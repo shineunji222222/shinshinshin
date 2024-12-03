@@ -1,60 +1,59 @@
 #include <stdio.h>
 
-int isLeapYear(int year) {
-    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+// Function to get the day of the week for the 1st day of the month
+int getFirstDayOfMonth(int year, int month) {
+    int day = 1;
+    int y = year - (14 - month) / 12;
+    int m = month + 12 * ((14 - month) / 12) - 2;
+    return (day + y + y/4 - y/100 + y/400 + (31*m)/12) % 7;
 }
 
-int getDaysInMonth(int month, int year) {
-    switch (month) {
-        case 4: case 6: case 9: case 11:
-            return 30;
-        case 2:
-            return isLeapYear(year) ? 29 : 28;
-        default:
-            return 31;
+// Function to print the calendar for a given month and year
+void printCalendar(int year, int month) {
+    const char *months[] = {"January", "February", "March", "April", "May", "June",
+                            "July", "August", "September", "October", "November", "December"};
+    const int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    // Check for leap year
+    int days = daysInMonth[month - 1];
+    if (month == 2 && (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0))) {
+        days = 29;
     }
-}
 
-void printCalendar(int year) {
-    const char *months[] = {
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    };
-    const char *days[] = {
-        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-    };
+    // Print the calendar header
+    printf("     %s %d\n", months[month - 1], year);
+    printf(" Su Mo Tu We Th Fr Sa\n");
 
-    int dayOfWeek = 0; // Assuming the year starts on a Sunday
+    // Get the first day of the month
+    int firstDay = getFirstDayOfMonth(year, month);
 
-    for (int month = 1; month <= 12; month++) {
-        printf("\n  ------------%s-------------\n", months[month - 1]);
-        for (int i = 0; i < 7; i++) {
-            printf("%s ", days[i]);
-        }
-        printf("\n");
+    // Print leading spaces
+    for (int i = 0; i < firstDay; i++) {
+        printf("   ");
+    }
 
-        int daysInMonth = getDaysInMonth(month, year);
-        for (int i = 0; i < dayOfWeek; i++) {
-            printf("    ");
-        }
-
-        for (int day = 1; day <= daysInMonth; day++) {
-            printf("%3d ", day);
-            if (++dayOfWeek > 6) {
-                dayOfWeek = 0;
-                printf("\n");
-            }
-        }
-        if (dayOfWeek != 0) {
+    // Print the days of the month
+    for (int day = 1; day <= days; day++) {
+        printf("%3d", day);
+        if ((day + firstDay) % 7 == 0) {
             printf("\n");
         }
     }
+    printf("\n");
 }
 
 int main() {
-    int year;
+    int year, month;
     printf("Enter year: ");
     scanf("%d", &year);
-    printCalendar(year);
+    printf("Enter month (1-12): ");
+    scanf("%d", &month);
+
+    if (month < 1 || month > 12) {
+        printf("Invalid month. Please enter a value between 1 and 12.\n");
+        return 1;
+    }
+
+    printCalendar(year, month);
     return 0;
 }
